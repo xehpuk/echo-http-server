@@ -4,10 +4,10 @@ This HTTP server does the following:
 
 1. Echoes the request headers, potentially prefixed and suffixed.
 2. Responds to the request, depending on the method:
-   1. `PATCH`, `POST`, `PUT`: Pipes the request body to the response body.
-   2. `DELETE`, `HEAD`, `GET`: Empty 200 OK
-   3. `OPTIONS`: Behaves like a normal server by returning the allowed headers.
-   4. else: 405 Method Not Allowed
+   - `PATCH`, `POST`, `PUT`: Pipes the request body to the response body.
+   - `DELETE`, `HEAD`, `GET`: Empty 200 OK
+   - `OPTIONS`: Behaves like a normal server by returning the allowed headers.
+   - else: 405 Method Not Allowed
 
 ```
 Usage: echo-http-server [-?vV] [-b=<backlog>] [-h=<host>] [-p=<port>] [-P=<headerPrefix>] [-s=<headerSuffix>]
