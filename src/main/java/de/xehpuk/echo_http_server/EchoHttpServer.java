@@ -146,8 +146,8 @@ public class EchoHttpServer implements Runnable {
 							? Long.parseLong(reqHeaders.getFirst(Header.CONTENT_LENGTH))
 							: ResponseLength.CHUNKED);
 						try (
-							InputStream is = he.getRequestBody();
-							OutputStream os = he.getResponseBody();
+							final InputStream is = he.getRequestBody();
+							final OutputStream os = he.getResponseBody();
 						) {
 							is.transferTo(os);
 						}
