@@ -10,15 +10,17 @@ This HTTP server does the following:
    - else: 405 Method Not Allowed
 
 ```
-Usage: echo-http-server [-?vV] [-b=<backlog>] [-h=<host>] [-p=<port>] [-P=<headerPrefix>] [-s=<headerSuffix>]
+Usage: echo-http-server [-?BHvV] [-b=<backlog>] [-h=<host>] [-p=<port>] [-P=<headerPrefix>] [-s=<headerSuffix>]
   -?, --help                display this help message
   -b, --backlog=<backlog>   the maximum number of queued incoming connections to allow (default 1)
+  -B, --body                log incoming requests' body
   -h, --host=<host>         the host to listen on (default "localhost")
+  -H, --headers             log incoming requests' headers
   -p, --port=<port>         the port to listen on (default 8080)
   -P, --prefix=<headerPrefix>
                             the prefix to use for the echoed headers (default "X-Echo-")
   -s, --suffix=<headerSuffix>
                             the suffix to use for the echoed headers
-  -v, --verbose             log incoming requests
+  -v, --verbose             log incoming requests completely
   -V, --version             display version info
 ```

@@ -16,6 +16,7 @@ import java.io.UncheckedIOException;
 import java.net.InetSocketAddress;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 import java.util.List;
 import java.util.Map;
@@ -45,8 +46,14 @@ public class EchoHttpServer implements Runnable {
 	@Option(names = {"-b", "--backlog"}, description = "the maximum number of queued incoming connections to allow (default ${DEFAULT-VALUE})")
 	private int backlog = 1;
 
-	@Option(names = {"-v", "--verbose"}, description = "log incoming requests")
+	@Option(names = {"-v", "--verbose"}, description = "log incoming requests completely")
 	private boolean verbose;
+
+	@Option(names = {"-H", "--headers"}, description = "log incoming requests' headers")
+	private boolean verboseHeaders;
+
+	@Option(names = {"-B", "--body"}, description = "log incoming requests' body")
+	private boolean verboseBody;
 
 	private static class Header {
 		static final String ALLOW = "Allow";
@@ -84,8 +91,12 @@ public class EchoHttpServer implements Runnable {
 		Method.PUT
 	);
 	
-	static {
-		System.setProperty("picocli.usage.width", "120");
+	private static final String PICOCLI_USAGE_WIDTH = "picocli.usage.width";
+	
+	static { 
+		if (System.getProperty(PICOCLI_USAGE_WIDTH) == null) {
+			System.setProperty(PICOCLI_USAGE_WIDTH, "120");
+		}
 	}
 
 	public static void main(final String... args) throws IOException {
@@ -94,28 +105,37 @@ public class EchoHttpServer implements Runnable {
 			System.exit(exitCode);
 		}
 	}
+	
+	private boolean printHeaders() {
+		return verbose || verboseHeaders;
+	}
+	
+	private boolean printBody() {
+		return verbose || verboseBody;
+	}
 
 	private Stream<Entry<String, List<String>>> streamHeaders(final Map<String, List<String>> map) {
 		final var stream = map.entrySet().stream();
-		return verbose
+		return printHeaders()
 			? stream.peek(header -> header.getValue().forEach(value -> System.out.printf("%s: %s%n", header.getKey(), value)))
 			: stream;
 	}
 
 	private void beforeRequest(final HttpExchange he) {
-		if (verbose) {
-			System.out.printf("[%1$tF %1$tT] %2$s %3$s %4$s%n",
-				LocalDateTime.now(),
-				he.getRequestMethod(),
-				he.getRequestURI(),
-				he.getProtocol());
-		}
+		System.out.printf("[%1$tF %1$tT] %2$s %3$s %4$s%n",
+			LocalDateTime.now(),
+			he.getRequestMethod(),
+			he.getRequestURI(),
+			he.getProtocol());
 	}
 
 	private void afterRequest(final HttpExchange he) {
-		if (verbose) {
-			System.out.println();
-		}
+		System.out.println();
+	}
+
+	private void afterResponse(final HttpExchange he) {
+		System.out.println();
+		System.out.println();
 	}
 
 	@Override
@@ -147,10 +167,14 @@ public class EchoHttpServer implements Runnable {
 							: ResponseLength.CHUNKED);
 						try (
 							final InputStream is = he.getRequestBody();
-							final OutputStream os = he.getResponseBody();
+							final OutputStream os = printBody()
+								? new OutputStreams(Arrays.asList(he.getResponseBody(), System.out))
+								: he.getResponseBody();
 						) {
 							is.transferTo(os);
 						}
+
+						afterResponse(he);
 					}
 					case Method.DELETE, Method.HEAD, Method.GET ->
 						he.sendResponseHeaders(Status.OK, ResponseLength.NONE);
