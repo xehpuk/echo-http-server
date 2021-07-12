@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 
-@Command(name = "echo-http-server", version = "EchoHttpServer 1.0.0")
+@Command(name = "echo-http-server", version = "EchoHttpServer 1.1.0")
 public class EchoHttpServer implements Runnable {
 	@Option(names = {"-V", "--version"}, versionHelp = true, description = "display version info")
 	private boolean versionInfoRequested;
