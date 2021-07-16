@@ -10,7 +10,7 @@ This HTTP server does the following:
    - else: 405 Method Not Allowed
 
 ```
-Usage: echo-http-server [-?BHvV] [-b=<backlog>] [-h=<host>] [-p=<port>] [-P=<headerPrefix>] [-s=<headerSuffix>]
+Usage: echo-http-server [-?BHvVw] [-b=<backlog>] [-h=<host>] [-p=<port>] [-P=<headerPrefix>] [-s=<headerSuffix>]
   -?, --help                display this help message
   -b, --backlog=<backlog>   the maximum number of queued incoming connections to allow (default 1)
   -B, --body                log incoming requests' body
