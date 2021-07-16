@@ -23,4 +23,6 @@ Usage: echo-http-server [-?BHvV] [-b=<backlog>] [-h=<host>] [-p=<port>] [-P=<hea
                             the suffix to use for the echoed headers
   -v, --verbose             log incoming requests completely
   -V, --version             display version info
+  -w, --wait                wait for the request to finish before sending the response
+                            (some clients may choke otherwise)
 ```

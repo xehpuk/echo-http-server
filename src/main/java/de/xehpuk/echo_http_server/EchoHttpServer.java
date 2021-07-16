@@ -16,14 +16,14 @@ import java.io.UncheckedIOException;
 import java.net.InetSocketAddress;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 
-@Command(name = "echo-http-server", version = "EchoHttpServer 1.1.0")
+@Command(name = "echo-http-server", version = "EchoHttpServer 1.2.0")
 public class EchoHttpServer implements Runnable {
 	@Option(names = {"-V", "--version"}, versionHelp = true, description = "display version info")
 	private boolean versionInfoRequested;
@@ -36,6 +36,9 @@ public class EchoHttpServer implements Runnable {
 
 	@Option(names = {"-p", "--port"}, description = "the port to listen on (default ${DEFAULT-VALUE})")
 	private int port = 8080;
+
+	@Option(names = {"-w", "--wait"}, description = "wait for the request to finish before sending the response\n(some clients may choke otherwise)")
+	private boolean wait;
 	
 	@Option(names = {"-P", "--prefix"}, description = "the prefix to use for the echoed headers (default \"${DEFAULT-VALUE}\")")
 	private String headerPrefix = "X-Echo-";
@@ -162,16 +165,22 @@ public class EchoHttpServer implements Runnable {
 
 				switch (he.getRequestMethod()) {
 					case Method.PATCH, Method.POST, Method.PUT -> {
-						he.sendResponseHeaders(Status.OK, reqHeaders.containsKey(Header.CONTENT_LENGTH)
-							? Long.parseLong(reqHeaders.getFirst(Header.CONTENT_LENGTH))
-							: ResponseLength.CHUNKED);
-						try (
-							final InputStream is = he.getRequestBody();
-							final OutputStream os = printBody()
-								? new OutputStreams(Arrays.asList(he.getResponseBody(), System.out))
-								: he.getResponseBody();
-						) {
-							is.transferTo(os);
+						try (final InputStream is = he.getRequestBody()) {
+							final byte[] input = wait
+								? is.readAllBytes()
+								: null;
+							he.sendResponseHeaders(Status.OK, reqHeaders.containsKey(Header.CONTENT_LENGTH)
+								? Long.parseLong(reqHeaders.getFirst(Header.CONTENT_LENGTH))
+								: ResponseLength.CHUNKED);
+							try (final OutputStream os = printBody()
+									? new OutputStreams(Arrays.asList(he.getResponseBody(), System.out))
+									: he.getResponseBody()) {
+								if (wait) {
+									os.write(input);
+								} else {
+									is.transferTo(os);
+								}
+							}
 						}
 
 						afterResponse(he);

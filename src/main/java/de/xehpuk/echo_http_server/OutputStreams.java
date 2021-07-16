@@ -9,11 +9,11 @@ import java.util.stream.Collectors;
 /**
  * Broadcasts output to an arbitrary number of streams.
  * @author xehpuk
+ * @since 1.1.0
  */
 public class OutputStreams extends OutputStream {
 	/**
 	 * Does something with a stream that may throw an {@link IOException}.
-	 * @since 1.1.0
 	 */
 	@FunctionalInterface
 	private static interface IORunnable {
